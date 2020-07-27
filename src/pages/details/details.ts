@@ -362,7 +362,7 @@ ionViewDidLoad()
       if(this.platform.is('ios')) {
         path = this.file.documentsDirectory;
       } else {
-        path = this.file.dataDirectory;
+        path = this.file.externalApplicationStorageDirectory;
       }
   
       const fileTransfer = this.transfer.create();
