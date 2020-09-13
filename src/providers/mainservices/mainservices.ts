@@ -119,7 +119,7 @@ export class MainservicesProvider {
 
   
   //طلب صيانه من مكاني ( طلب ساطحه 
-  sathaorder(access_token,name,phone,brand,car_model,manufact,mid,car_number,date,branch_id,remarks,email,device,sathaorderSuccessCallback,sathaorderFailureCallback) {
+  sathaorder(access_token,name,phone,brand,car_model,manufact,mid,car_number,date,branch_id,remarks,email,device,delivery_time_id,sathaorderSuccessCallback,sathaorderFailureCallback) {
     
        
      
@@ -138,7 +138,8 @@ export class MainservicesProvider {
       'branch_id' : branch_id,
       'remarkes' : remarks,
       'email':email,
-      'device_id':device
+      'device_id':device,
+      'delivery_time_id':delivery_time_id
 
     }
     console.log(JSON.stringify(params))
@@ -748,9 +749,6 @@ getCarbyid(access_token,car_id, getCarbyidSuccessCallback, getCarbyidFailureCall
     let loading = this.loadingCtrl.create({
       spinner: 'bubbles',
     });
-  
-      
-  
     
     let headers = new HttpHeaders();
     let params={
@@ -1467,10 +1465,6 @@ getCarbyid(access_token,car_id, getCarbyidSuccessCallback, getCarbyidFailureCall
 
   config(access_token,configSuccessCallback,configFailureCallback) {
   
-  
-      
-     
-    
     let headers = new HttpHeaders();
     let params={
     }
@@ -1570,5 +1564,45 @@ getCarbyid(access_token,car_id, getCarbyidSuccessCallback, getCarbyidFailureCall
     )
  
 }
+
+//#region 10-9-2020
+getWorkTimeHours(selected_date,configSuccessCallback,configFailureCallback) {
+  
+  console.log("selected_date from api: "+selected_date)
+  let headers = new HttpHeaders();
+  let params={
+    "selected_date":selected_date
+  }
+  // console.log(access_token)
+  let encryptedSearch=JSON.stringify(this.cent.encrypt(params));
+  let parameter = new HttpParams().set('data', encryptedSearch)
+  headers = headers.set('Content-Type', 'application/x-www-form-urlencoded')
+  // .set('Authorization', 'Bearer ' + access_token).set('Accept','application/json');
+  let serviceUrl = this.cent.serviceurl + 'worktimehours';
+  // this.http.get(serviceUrl, { headers: headers })
+  this.http.get(serviceUrl,{ headers: headers,params: parameter})
+   
+   .subscribe(
+    data => {
+      let decryptedStores =JSON.parse(this.cent.decrypt(data))
+   
+
+      configSuccessCallback(decryptedStores)
+      // configSuccessCallback(data)
+
+    
+    },
+    err => {
+     
+
+      configFailureCallback(err)
+      
+    }
+  )
+
+}
+//#endregion
+
+
 
 }

@@ -41,6 +41,7 @@ export class MaintainancePage {
   remarks:AbstractControl
   phone:AbstractControl
   car_model:AbstractControl
+  workHour;
   car_number:AbstractControl
   email:AbstractControl
   address:any
@@ -109,7 +110,16 @@ deliver_place_lat:any
   butDisabled2:any=true
   check:any
 accestoken:any
+
+workHours = [];
+selectedData;  
+time;
+recieve;
+deliver;
+
+
   constructor(public plt:Platform,public storage:Storage,public Alert:AlertController,public datePicker:DatePicker,public selector:WheelSelector,public nativeGeocoder: NativeGeocoder,public toastCtrl:ToastController,public navCtrl: NavController,public modalCtrl: ModalController,public formBuilder:FormBuilder, public navParams: NavParams,public cent:CentralProvider,public viewCtrl:ViewController,public mainservice:MainservicesProvider) {
+
     this.accestoken= localStorage.getItem('adftrmee')
     this.cent.status=0
     this.mainservice.manufactureyear(this.accestoken,(data) => this.manufactureyearSuccessCallback(data),(data) => this.manufactureyearFailureCallback(data))
@@ -198,7 +208,7 @@ accestoken:any
       branch_name: ['',Validators.required,],
       mintype: ['',Validators.required,],
       email: ['',Validators.required,],
-
+      workHour:['',Validators.required]
       
     });
   
@@ -215,6 +225,7 @@ accestoken:any
     this.year=this.data.controls['year'];
     this.mintype=this.data.controls['mintype'];
     this.email=this.data.controls['email'];
+    // this.workHour = this.data.controls['workHour'];
 
 
   }
@@ -249,6 +260,8 @@ accestoken:any
     this.isenabled=false
 
   }
+
+
   confirm()
   {
   
@@ -256,10 +269,16 @@ accestoken:any
    
     let num=this.phone.value + ""
     let car=this.car_number.value + ""
-    this.receive_place_lat =this.lat.Lat;
-    this. receive_place_long=this.lat.Long;
-    this.deliver_place_lat = this.lng.Lat;
-    this. deliver_place_long=this.lng.Long;
+
+    if(this.lat) {
+      this.receive_place_lat =this.lat.Lat;
+      this. receive_place_long=this.lat.Long;
+    }
+
+    if(this.lng) {
+      this.deliver_place_lat = this.lng.Lat;
+      this. deliver_place_long=this.lng.Long;
+    }
    
 
     console.log(this.car_model.value,"  ,", this.year.value,",",this.mark.value," , ",this.name.value," , ",this.phone.value," , ", this.name.value ," , ",this.car_number.value," , ",this. receive_place_lat,", ",this.receive_place_long, this. deliver_place_long," , ",this.date.value,", ",this.branch_id)
@@ -294,6 +313,17 @@ this.branchh1='true'
  {
 this.phonee1='true'
  }
+
+
+ if(this.receive_place.value=="" || this.receive_place.value==null || this.receive_place.value==undefined) {
+   this.recieve = 'true'
+ }
+
+ if(this.deliver_place.value==""|| this.deliver_place.value==null || this.deliver_place.value==null) {
+  this.deliver = 'true'
+}
+
+
  this.presentConfirm()
     }
    
@@ -444,6 +474,8 @@ this.presentToast1()
   modal()
   {
 
+    this.recieve = 'false';
+
     let mapModal = this.modalCtrl.create(MapPage);
     mapModal.onDidDismiss(data=>{
       this.lat=data
@@ -454,8 +486,10 @@ this.presentToast1()
     mapModal.present();
 
   }
-  getdate()
+  getdate(isTime)
   {
+    console.log("isTime: "+isTime);
+
     this.datee='false'
     this.datee1='false'
     //problem
@@ -503,10 +537,57 @@ this.presentToast1()
       date =>{ 
     this.da=date.toLocaleDateString('ar-EG')
     this.da=this.da.replace("/","-").replace("/","-")
+
+    //#region 10-9-2020
+    if(isTime && this.da) {
+      this.mainservice.getWorkTimeHours(this.da,(data) => this.getWorkTimeHoursSuccessCallback(data), (error) => this.getWorkTimeHoursFailureCallback(error))
+    }
+    //#endregion
     
   },
       err => console.log('Error occurred while getting date: '+ err)
     );
+  }
+
+  checkTimeAvailability() {
+
+    this.time = 'false'
+
+    console.log("this.workHour: "+this.workHour);
+
+   this.selectedData = this.workHours.find(el => {
+      return el.id == this.workHour;
+    });
+
+    console.log("selectedData Slot_available: "+JSON.stringify(this.selectedData.Slot_available));
+
+
+    if(this.selectedData.Slot_available == 0) {
+      this.presentToastNotavailable();
+    }
+  }
+
+  presentToastNotavailable() {
+    let toast = this.toastCtrl.create({
+      message: 'عفواً هذا التوقيت غير متاح من فضلك اختر توقيت آخر',
+      duration: 3000,
+      position: 'bottom'
+    });
+    toast.present();
+  }
+
+  getWorkTimeHoursSuccessCallback(data) {
+    console.log("success");
+    console.log("data 10-9-2020: "+JSON.stringify(data));
+
+    this.workHours = data;
+    console.log("this.workHours: "+this.workHours);
+
+  }
+
+  getWorkTimeHoursFailureCallback(error) {
+    console.log("error");
+    console.log("error 10-9-2020: "+JSON.stringify(error));
   }
    
   reset()
@@ -521,11 +602,14 @@ this.presentToast1()
   modal1()
   {
 
+    
     let mapModal = this.modalCtrl.create(MapPage);
     mapModal.onDidDismiss(data=>{
       this.lng=data
       this.address1 = data.Address
     
+      this.deliver = 'false';
+
      })
     mapModal.present();
 
@@ -575,6 +659,12 @@ this.presentToast1()
    {
      this.datee='true'
    }
+
+   if( this.workHour=="" || this.workHour==null || this.workHour==undefined)
+   {
+     this.time ='true'
+   }
+
    if(this.modelval=="")
    {
      this.carmodel='true'
@@ -633,6 +723,7 @@ this.presentToast1()
         }
         else{
         this.check="satha"
+        
         this.mainservice.config(this.accestoken,(data) => this.configSuccessCallback(data), (data) => this.configFailureCallback(data))
         }
       }
@@ -684,6 +775,12 @@ this.presentToast1()
   {
     this.datee='true'
   }
+
+  if( this.workHour=="" || this.workHour==null || this.workHour==undefined)
+  {
+    this.time ='true'
+  }
+
   if(this.car_model.value=="")
   {
     this.carmodel='true'
@@ -799,7 +896,12 @@ this.presentConfirm2()
   }
   sathaorderSuccessCallback(data)
   {
-    console.log(JSON.stringify(data))
+    console.log("10-9-2020 satha time response"+JSON.stringify(data))
+
+    console.log("data.available_for_order: "+data.available_for_order);
+    console.log("data.available_for_order: "+data.status);
+
+
     this.storage.set('name',this.name.value)
     this.storage.set('phone',this.phone.value)
     this.storage.set('email',this.email.value)
@@ -807,17 +909,28 @@ this.presentConfirm2()
     this.storage.set('model',this.car_model.value)
     this.storage.set('year',this.year.value)
     this.storage.set('number',this.car_number.value)
+  
+
+   if(data.available_for_order == 1 && data.status) {
+
     this.data.reset()
     this.receive_place_lat=""
     this.receive_place_long=""
     this.deliver_place_lat=""
-   this.deliver_place_long=""
-   this.da=""
+    this.deliver_place_long=""
+    this.da=""
+
+    this.workHour = 0;
 
     this.presentToast()
     this.disable=false
     this.disable1=false
-   this.isenabled=true
+    this.isenabled=true
+
+   } else {
+     this.presentToastNotavailable();
+   }
+    
     
   }
   delnumb()
@@ -1041,13 +1154,12 @@ confirmorder()
           }
   if(this.page=="car")
   {
-    
-    this.mainservice.sathaorder(this.accestoken,this.name.value,this.phone.value,this.markid,this.modelid,this.yearid,this.typeid,this.car_number.value,this.date.value,this.branch_id,this.remarks.value,this.email.value,this.cent.DeviceId,(data) => this.sathaorderSuccessCallback(data),(data) => this.sathaorderFailureCallback(data))
+    this.mainservice.sathaorder(this.accestoken,this.name.value,this.phone.value,this.markid,this.modelid,this.yearid,this.typeid,this.car_number.value,this.date.value,this.branch_id,this.remarks.value,this.email.value,this.cent.DeviceId,this.workHour,(data) => this.sathaorderSuccessCallback(data),(data) => this.sathaorderFailureCallback(data))
 
   }
   else{
     
-    this.mainservice.sathaorder(this.accestoken,this.name.value,this.phone.value,this.mark.value,this.car_model.value,this.year.value,this.mintype.value,this.car_number.value,this.date.value,this.branch_id,this.remarks.value,this.email.value,this.cent.DeviceId,(data) => this.sathaorderSuccessCallback(data),(data) => this.sathaorderFailureCallback(data))
+    this.mainservice.sathaorder(this.accestoken,this.name.value,this.phone.value,this.mark.value,this.car_model.value,this.year.value,this.mintype.value,this.car_number.value,this.date.value,this.branch_id,this.remarks.value,this.email.value,this.cent.DeviceId,this.workHour,(data) => this.sathaorderSuccessCallback(data),(data) => this.sathaorderFailureCallback(data))
 
   }
 }
