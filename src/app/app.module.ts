@@ -63,6 +63,9 @@ import { DocumentViewer, DocumentViewerOptions } from '@ionic-native/document-vi
 import { FileOpener } from '@ionic-native/file-opener';
 import { PdfPopupPage } from '../pages/pdf-popup/pdf-popup';
 
+import { CalendarModule } from 'ionic3-calendar-en';
+
+
 // import { PdfViewerModule } from 'ng2-pdf-viewer';
 // import { PdfPopupPage } from '../pages/pdf-popup/pdf-popup';
 // import { SocketIoModule, SocketIoConfig } from 'ng-socket-io';
@@ -105,6 +108,7 @@ import { PdfPopupPage } from '../pages/pdf-popup/pdf-popup';
     BrowserModule,
     LazyLoadImageModule,
     IonicModule.forRoot(MyApp),
+    CalendarModule
     // PdfViewerModule
     // SocketIoModule.forRoot(config)
   ],

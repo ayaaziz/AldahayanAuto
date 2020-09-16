@@ -1,13 +1,50 @@
 page-maintainance {
    
+    // .scroll-content {
+    //     padding: 16px;
+    //     margin-top: 45px;
+    //     padding-left: 0 !important;
+    //     padding-right: 0 !important;
+    // }
+
     .scroll-content {
-        padding: 16px;
-        margin-top: 45px;
         padding-left: 0 !important;
         padding-right: 0 !important;
     }
+
+    ion-scroll .scroll-content {
+        padding: 0 !important;
+        height: 70px;
+    } 
     .toolbar-md-light .toolbar-background-md {
         background: #fdeeee !important;
+    }
+
+    .daySelected {
+        background-color: #449802;
+    }
+
+
+    .ion-md-arrow-back:before {
+        // content: "\f27d";
+        content: "\f287";
+    }   
+
+    .ion-md-arrow-forward:before {
+        // content: "\f287";
+        content: "\f27d";
+    }
+
+    .selected {
+        background-color: #50B591; 
+        color: #fff;
+        border: 1px solid #50B591;
+    }
+
+    .notSelected {
+        background-color: #fff;
+        border: 1px solid #50B591;
+        color: #50B591;
     }
    
        ion-select {

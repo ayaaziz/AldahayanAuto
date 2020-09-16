@@ -116,6 +116,7 @@ selectedData;
 time;
 recieve;
 deliver;
+currentEvents;
 
 
   constructor(public plt:Platform,public storage:Storage,public Alert:AlertController,public datePicker:DatePicker,public selector:WheelSelector,public nativeGeocoder: NativeGeocoder,public toastCtrl:ToastController,public navCtrl: NavController,public modalCtrl: ModalController,public formBuilder:FormBuilder, public navParams: NavParams,public cent:CentralProvider,public viewCtrl:ViewController,public mainservice:MainservicesProvider) {
@@ -208,7 +209,7 @@ deliver;
       branch_name: ['',Validators.required,],
       mintype: ['',Validators.required,],
       email: ['',Validators.required,],
-      workHour:['',Validators.required]
+      // workHour:['',Validators.required]
       
     });
   
@@ -228,9 +229,39 @@ deliver;
     // this.workHour = this.data.controls['workHour'];
 
 
+    this.currentEvents = [
+      {
+        year: 2020,
+        month: 8,
+        date: 19,
+      },
+      {
+        year: 2020,
+        month: 8,
+        date: 20
+      },
+      {
+        year: 2020,
+        month: 8,
+        date: 21
+      },
+      {
+        year: 2020,
+        month: 8,
+        date: 22
+      },
+      {
+        year: 2020,
+        month: 8,
+        date: 23
+      },
+      {
+        year: 2020,
+        month: 8,
+        date: 24
+      }
+    ];
   }
- 
- 
 
  delphone()
  {
@@ -426,6 +457,24 @@ this.presentToast1()
     alert.present();
   }
 
+  presentToastDate() {
+    let alert = this.toastCtrl.create({
+      message: 'من فضلك اختر التاريخ',
+      duration: 3000,
+      position: 'bottom'
+    });
+    alert.present();
+  }
+
+  presentToastTime() {
+    let alert = this.toastCtrl.create({
+      message: 'من فضلك اختر التوقيت',
+      duration: 3000,
+      position: 'bottom'
+    });
+    alert.present();
+  }
+
   presentConfirm3() {
     let alert = this.toastCtrl.create({
       message: 'رقم الجوال غير صحيح',
@@ -538,15 +587,32 @@ this.presentToast1()
     this.da=date.toLocaleDateString('ar-EG')
     this.da=this.da.replace("/","-").replace("/","-")
 
+    console.log("this.da: "+this.da);
+    // this.da: ١٥‏-٩‏-٢٠٢٠
+
     //#region 10-9-2020
-    if(isTime && this.da) {
-      this.mainservice.getWorkTimeHours(this.da,(data) => this.getWorkTimeHoursSuccessCallback(data), (error) => this.getWorkTimeHoursFailureCallback(error))
-    }
+    // if(isTime && this.da) {
+    //   this.mainservice.getWorkTimeHours(this.da,(data) => this.getWorkTimeHoursSuccessCallback(data), (error) => this.getWorkTimeHoursFailureCallback(error))
+    // }
     //#endregion
     
   },
       err => console.log('Error occurred while getting date: '+ err)
     );
+  }
+
+  onDaySelect(ev) {
+    
+    this.datee='false';
+
+    console.log("event: "+JSON.stringify(ev));
+    // {"year":2020,"month":8,"date":17,"isThisMonth":true,"isToday":false,"isSelect":true,"hasEvent":false}
+    this.da = ev.date + "-" + (ev.month + 1) + "-" + ev.year;
+    console.log("this.da2: "+this.da);
+  
+    if(this.da) {
+      this.mainservice.getWorkTimeHours(this.da,(data) => this.getWorkTimeHoursSuccessCallback(data), (error) => this.getWorkTimeHoursFailureCallback(error))
+    }
   }
 
   checkTimeAvailability() {
@@ -558,6 +624,30 @@ this.presentToast1()
    this.selectedData = this.workHours.find(el => {
       return el.id == this.workHour;
     });
+
+    console.log("selectedData Slot_available: "+JSON.stringify(this.selectedData.Slot_available));
+
+
+    if(this.selectedData.Slot_available == 0) {
+      this.presentToastNotavailable();
+    }
+  }
+
+  selectTime(selectedTimeId) {
+
+    console.log("this.workHour: "+selectedTimeId);
+
+    this.workHour = selectedTimeId;
+
+    this.workHours.forEach(el => {
+      el.isSelected = false;
+    });
+
+    this.selectedData = this.workHours.find(el => {
+      return el.id == selectedTimeId;
+    });
+
+    this.selectedData.isSelected = true;
 
     console.log("selectedData Slot_available: "+JSON.stringify(this.selectedData.Slot_available));
 
@@ -581,6 +671,11 @@ this.presentToast1()
     console.log("data 10-9-2020: "+JSON.stringify(data));
 
     this.workHours = data;
+
+    this.workHours.forEach(el => {
+      el.isSelected = false;
+    });
+
     console.log("this.workHours: "+this.workHours);
 
   }
@@ -645,7 +740,8 @@ this.presentToast1()
     if(this.page=="car")
     {
     
-      if(this.modelval=="" || this.date.value==null || this.date.value==undefined|| this.yearid=="" || this.markid==""||   this.typeid=="" || this.phone.value=="" ||   this.date.value==""||this.branch_id==""||this.branch_name.value=="" ||this.branch_name.value==null)
+      // if(this.modelval=="" || this.date.value==null || this.date.value==undefined|| this.yearid=="" || this.markid==""||   this.typeid=="" || this.phone.value=="" ||   this.date.value==""||this.branch_id==""||this.branch_name.value=="" ||this.branch_name.value==null)
+      if(this.modelval=="" || this.yearid=="" || this.markid==""||   this.typeid=="" || this.phone.value=="" ||this.branch_id==""||this.branch_name.value=="" ||this.branch_name.value==null)
       {
    this.presentConfirm()
   
@@ -689,6 +785,12 @@ this.presentToast1()
    {
      this.branchh='true'
    }
+      }
+      else if(!this.da) {
+        this.presentToastDate();
+      
+      } else if(!this.workHour) {
+        this.presentToastTime();
       }
     
       else if (!(num.length ==10))
@@ -761,7 +863,8 @@ this.presentToast1()
     }
     else{
     
-    if(this.car_model.value=="" || this.year.value=="" ||  this.date.value==null || this.date.value==undefined|| this.mark.value==""|| this.mintype.value=="" || this.phone.value=="" ||  this.date.value==""||this.branch_id==""||this.branch_name.value=="" ||this.branch_name.value==null)
+    // if(this.car_model.value=="" || this.year.value=="" ||  this.date.value==null || this.date.value==undefined|| this.mark.value==""|| this.mintype.value=="" || this.phone.value=="" ||  this.date.value==""||this.branch_id==""||this.branch_name.value=="" ||this.branch_name.value==null)
+    if(this.car_model.value=="" || this.year.value=="" || this.mark.value==""|| this.mintype.value=="" || this.phone.value=="" || this.branch_id==""||this.branch_name.value=="" ||this.branch_name.value==null)
     {
  this.presentConfirm()
  
@@ -805,6 +908,13 @@ this.presentToast1()
   {
     this.branchh='true'
   }
+    }
+
+    else if(!this.da) {
+      this.presentToastDate();
+    
+    } else if(!this.workHour) {
+      this.presentToastTime();
     }
    
     else if (!(num.length ==10))
@@ -1154,12 +1264,14 @@ confirmorder()
           }
   if(this.page=="car")
   {
-    this.mainservice.sathaorder(this.accestoken,this.name.value,this.phone.value,this.markid,this.modelid,this.yearid,this.typeid,this.car_number.value,this.date.value,this.branch_id,this.remarks.value,this.email.value,this.cent.DeviceId,this.workHour,(data) => this.sathaorderSuccessCallback(data),(data) => this.sathaorderFailureCallback(data))
+    // this.mainservice.sathaorder(this.accestoken,this.name.value,this.phone.value,this.markid,this.modelid,this.yearid,this.typeid,this.car_number.value,this.date.value,this.branch_id,this.remarks.value,this.email.value,this.cent.DeviceId,this.workHour,(data) => this.sathaorderSuccessCallback(data),(data) => this.sathaorderFailureCallback(data))
+    this.mainservice.sathaorder(this.accestoken,this.name.value,this.phone.value,this.markid,this.modelid,this.yearid,this.typeid,this.car_number.value,this.da,this.branch_id,this.remarks.value,this.email.value,this.cent.DeviceId,this.workHour,(data) => this.sathaorderSuccessCallback(data),(data) => this.sathaorderFailureCallback(data))
 
   }
   else{
     
-    this.mainservice.sathaorder(this.accestoken,this.name.value,this.phone.value,this.mark.value,this.car_model.value,this.year.value,this.mintype.value,this.car_number.value,this.date.value,this.branch_id,this.remarks.value,this.email.value,this.cent.DeviceId,this.workHour,(data) => this.sathaorderSuccessCallback(data),(data) => this.sathaorderFailureCallback(data))
+    // this.mainservice.sathaorder(this.accestoken,this.name.value,this.phone.value,this.mark.value,this.car_model.value,this.year.value,this.mintype.value,this.car_number.value,this.date.value,this.branch_id,this.remarks.value,this.email.value,this.cent.DeviceId,this.workHour,(data) => this.sathaorderSuccessCallback(data),(data) => this.sathaorderFailureCallback(data))
+    this.mainservice.sathaorder(this.accestoken,this.name.value,this.phone.value,this.mark.value,this.car_model.value,this.year.value,this.mintype.value,this.car_number.value,this.da,this.branch_id,this.remarks.value,this.email.value,this.cent.DeviceId,this.workHour,(data) => this.sathaorderSuccessCallback(data),(data) => this.sathaorderFailureCallback(data))
 
   }
 }
