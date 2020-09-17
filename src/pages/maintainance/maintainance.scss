@@ -35,6 +35,16 @@ page-maintainance {
         content: "\f27d";
     }
 
+    .ion-ios-arrow-back:before {
+        // content: "\f3cf";
+        content: "\f3d1";
+    }
+
+    .ion-ios-arrow-forward:before {
+        // content: "\f3d1";
+        content: "\f3cf";
+    }
+
     .selected {
         background-color: #50B591; 
         color: #fff;

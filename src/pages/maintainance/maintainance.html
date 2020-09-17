@@ -457,7 +457,7 @@
                 </ion-col> -->
 
                 <ion-col col-8 style="background-color: #fff;margin-top: 10px;">
-                  <ion-calendar #calendar (onDaySelect)="onDaySelect($event)" [events]="currentEvents"></ion-calendar>
+                  <ion-calendar #calendar (onDaySelect)="onDaySelect($event)" [events]="currentEvents" lang="AR"></ion-calendar>
                 </ion-col>
       </ion-row>  
       <!-- <ion-row *ngIf="(date.hasError('required') && date.touched) || datee=='true'">
@@ -487,7 +487,7 @@
     
     -->
 
-      <ion-row *ngIf="workHours.length > 0">
+      <ion-row *ngIf="workHours.length > 0 && isAvailableDate">
         <ion-col col-4>
           <ion-label  class="jop"  style=" color:#d63932 ">التوقيت</ion-label>
         </ion-col> 

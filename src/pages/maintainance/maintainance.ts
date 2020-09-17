@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, DateTime } from 'ionic-angular';
 import { ViewController } from 'ionic-angular/navigation/view-controller';
 import {Validators, FormBuilder, FormGroup ,AbstractControl} from '@angular/forms';
 import { MainservicesProvider } from '../../providers/mainservices/mainservices';
@@ -117,6 +117,7 @@ time;
 recieve;
 deliver;
 currentEvents;
+isAvailableDate:boolean = false;
 
 
   constructor(public plt:Platform,public storage:Storage,public Alert:AlertController,public datePicker:DatePicker,public selector:WheelSelector,public nativeGeocoder: NativeGeocoder,public toastCtrl:ToastController,public navCtrl: NavController,public modalCtrl: ModalController,public formBuilder:FormBuilder, public navParams: NavParams,public cent:CentralProvider,public viewCtrl:ViewController,public mainservice:MainservicesProvider) {
@@ -233,22 +234,7 @@ currentEvents;
       {
         year: 2020,
         month: 8,
-        date: 19,
-      },
-      {
-        year: 2020,
-        month: 8,
-        date: 20
-      },
-      {
-        year: 2020,
-        month: 8,
-        date: 21
-      },
-      {
-        year: 2020,
-        month: 8,
-        date: 22
+        date: 22,
       },
       {
         year: 2020,
@@ -259,6 +245,21 @@ currentEvents;
         year: 2020,
         month: 8,
         date: 24
+      },
+      {
+        year: 2020,
+        month: 8,
+        date: 26
+      },
+      {
+        year: 2020,
+        month: 8,
+        date: 27
+      },
+      {
+        year: 2020,
+        month: 8,
+        date: 28
       }
     ];
   }
@@ -602,17 +603,52 @@ this.presentToast1()
   }
 
   onDaySelect(ev) {
-    
-    this.datee='false';
 
     console.log("event: "+JSON.stringify(ev));
     // {"year":2020,"month":8,"date":17,"isThisMonth":true,"isToday":false,"isSelect":true,"hasEvent":false}
-    this.da = ev.date + "-" + (ev.month + 1) + "-" + ev.year;
-    console.log("this.da2: "+this.da);
-  
-    if(this.da) {
-      this.mainservice.getWorkTimeHours(this.da,(data) => this.getWorkTimeHoursSuccessCallback(data), (error) => this.getWorkTimeHoursFailureCallback(error))
+
+    
+    this.datee='false';
+
+    var today = new Date();
+    var currDay = String(today.getDate()).padStart(2, '0');
+    var currMonth = String(today.getMonth() + 1).padStart(2, '0'); //January is 0
+    var currYear = today.getFullYear();
+
+    console.log("current year: "+currYear);
+    console.log("current month: "+currMonth);
+    console.log("current day: "+currDay);
+
+
+    if(ev.year < currYear
+    || (ev.year == currYear && (ev.month+1) < currMonth)
+    || (ev.year == currYear && (ev.month+1) == currMonth && ev.date < currDay)) {
+
+      this.isAvailableDate = false;
+      this.workHour = "";
+
+      console.log("invalid date");
+      this.presentToastInvalidDate();
+    
+    } else {
+
+      this.isAvailableDate = true;
+      this.da = ev.date + "-" + (ev.month + 1) + "-" + ev.year;
+      console.log("this.da2: "+this.da);
+    
+      if(this.da) {
+        this.mainservice.getWorkTimeHours(this.da,(data) => this.getWorkTimeHoursSuccessCallback(data), (error) => this.getWorkTimeHoursFailureCallback(error))
+      }
     }
+  }
+
+  presentToastInvalidDate() {
+    let toast = this.toastCtrl.create({
+      message: 'عفواً لا يمكن اختيار تاريخ يسبق التاريخ الحالي، من فضلك اختر تاريخ آخر',
+      duration: 3000,
+      position: 'bottom'
+    });
+    toast.present();
   }
 
   checkTimeAvailability() {
@@ -1006,7 +1042,7 @@ this.presentConfirm2()
   }
   sathaorderSuccessCallback(data)
   {
-    console.log("10-9-2020 satha time response"+JSON.stringify(data))
+    console.log("satha time response"+JSON.stringify(data))
 
     console.log("data.available_for_order: "+data.available_for_order);
     console.log("data.available_for_order: "+data.status);
@@ -1030,7 +1066,8 @@ this.presentConfirm2()
     this.deliver_place_long=""
     this.da=""
 
-    this.workHour = 0;
+    this.isAvailableDate = false;
+    this.workHour = "";
 
     this.presentToast()
     this.disable=false
