@@ -708,11 +708,14 @@ this.presentToast1()
 
     this.workHours = data;
 
+
+    console.log("this.workHours: "+JSON.stringify(this.workHours));
+
+
     this.workHours.forEach(el => {
       el.isSelected = false;
     });
 
-    console.log("this.workHours: "+this.workHours);
 
   }
 
